@@ -1,0 +1,5 @@
+error: #[pack_bools(default = true)] only available on `newtype` generation: use #[pack_bools(newtype)] on the struct
+ --> tests/compile/defaults_inline.rs:6:5
+  |
+6 |     a: bool,
+  |     ^

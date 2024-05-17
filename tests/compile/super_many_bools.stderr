@@ -1,0 +1,5 @@
+error: This struct contains more bools than would fit in your specified bit width
+ --> tests/compile/super_many_bools.rs:4:8
+  |
+4 | struct MyBools {
+  |        ^^^^^^^
