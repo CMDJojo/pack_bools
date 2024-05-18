@@ -41,18 +41,18 @@ impl<'a> Config<'a> {
         self.packed_bools = if value {
             val | 1 << 0
         } else {
-            val & !(1 << 1)
+            val & !(1 << 0)
         };
     }
 
     pub fn get_use_colors(&self) -> bool {
-        self.packed_bools & 1 << 0 != 0
+        self.packed_bools & 1 << 1 != 0
     }
 
     pub fn set_use_colors(&mut self, value: bool) {
         let val = self.packed_bools;
         self.packed_bools = if value {
-            val | 1 << 0
+            val | 1 << 1
         } else {
             val & !(1 << 1)
         };
@@ -114,7 +114,7 @@ impl<'a> Config<'a> {
         self.packed_bools.0 = if value {
             val | 1 << 0
         } else {
-            val & !(1 << 1)
+            val & !(1 << 0)
         };
     }
 
