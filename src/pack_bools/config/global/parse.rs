@@ -3,9 +3,11 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 
 use crate::pack_bools::config::global::{
-    Config, FieldName, GenType, PackedType, PackingStrategy, Template, VisibilityTemplate,
+    Config, FieldName, GenType, PackedType, PackingStrategy, Template, UpdateVisibilityTemplate,
+    VisibilityTemplate,
 };
 use crate::pack_bools::config::global::modify::Modifier;
+use crate::pack_bools::config::Visibility;
 
 impl Parse for Template {
     fn parse(input: ParseStream) -> syn::Result<Self> {
@@ -64,9 +66,20 @@ impl Parse for PackingStrategy {
 
 impl Parse for VisibilityTemplate {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let visibility = input.parse()?;
-        let template = input.parse()?;
+        let visibility: Visibility = input.parse()?;
+        let template: Template = input.parse()?;
         Ok(VisibilityTemplate {
+            visibility,
+            template,
+        })
+    }
+}
+
+impl Parse for UpdateVisibilityTemplate {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let visibility: Visibility = input.parse()?;
+        let template: Option<Template> = input.parse().ok();
+        Ok(UpdateVisibilityTemplate {
             visibility,
             template,
         })

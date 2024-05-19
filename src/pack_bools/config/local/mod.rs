@@ -29,11 +29,17 @@ pub enum Accessor {
     #[default]
     Default,
     Custom(VisibilityIdent),
-    None,
+    Skip,
 }
 
 #[derive(Debug)]
 pub struct VisibilityIdent {
     pub visibility: Visibility,
-    pub ident: Ident,
+    pub ident: Option<Ident>,
+}
+
+impl VisibilityIdent {
+    pub fn get_parts(&self) -> (&Visibility, Option<&Ident>) {
+        (&self.visibility, self.ident.as_ref())
+    }
 }

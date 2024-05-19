@@ -93,7 +93,7 @@ pub fn pack_bools(config: GlobalConfig, definition: ItemStruct) -> TokenStream {
         ) {
             let getter = quote! {
                 #getter (&self) -> bool {
-                    self. #packed_path & 1 << #idx != 0
+                    self.#packed_path & 1 << #idx != 0
                 }
             };
             functions.push(getter);
@@ -105,12 +105,11 @@ pub fn pack_bools(config: GlobalConfig, definition: ItemStruct) -> TokenStream {
         ) {
             let setter = quote! {
                 #setter (&mut self, value: bool) {
-                    let val = self. #packed_path;
-                    self.#packed_path = if value {
-                        val | 1 << #idx
+                    if value {
+                        self.#packed_path |= 1 << #idx;
                     } else {
-                        val & !(1 << #idx)
-                    };
+                        self.#packed_path &= !(1 << #idx);
+                    }
                 }
             };
             functions.push(setter);

@@ -1,0 +1,17 @@
+error[E0624]: method `get_a` is private
+  --> tests/compile/private_getters.rs:17:15
+   |
+4  |     #[pack_bools(get =)]
+   |     -------------------- private method defined here
+...
+17 |     let y = x.get_a();
+   |               ^^^^^ private method
+
+error[E0624]: method `get_b` is private
+  --> tests/compile/private_getters.rs:18:15
+   |
+4  |     #[pack_bools(get =)]
+   |     -------------------- private method defined here
+...
+18 |     let z = x.get_b();
+   |               ^^^^^ private method

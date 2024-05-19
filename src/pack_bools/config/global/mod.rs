@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{TokenStreamExt, ToTokens};
+use quote::{format_ident, TokenStreamExt, ToTokens};
 use syn::{Error, parse_quote};
 
 use crate::pack_bools::config::Visibility;
@@ -11,8 +11,10 @@ mod parse;
 
 #[derive(Debug)]
 pub struct Config {
-    pub getter: Option<VisibilityTemplate>,
-    pub setter: Option<VisibilityTemplate>,
+    pub getter: VisibilityTemplate,
+    pub skip_getter: bool,
+    pub setter: VisibilityTemplate,
+    pub skip_setter: bool,
     pub packed_type: PackingStrategy,
     pub field_name: FieldName,
     pub gen_type: GenType,
@@ -137,14 +139,16 @@ impl Template {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            getter: Some(VisibilityTemplate {
+            getter: VisibilityTemplate {
                 template: Template::from_str("get_", ""),
                 visibility: Visibility::Inherit,
-            }),
-            setter: Some(VisibilityTemplate {
+            },
+            skip_getter: false,
+            setter: VisibilityTemplate {
                 template: Template::from_str("set_", ""),
                 visibility: Visibility::Inherit,
-            }),
+            },
+            skip_setter: false,
             packed_type: PackingStrategy::Auto,
             field_name: FieldName("packed_bools".to_string()),
             gen_type: GenType::Inline,
@@ -156,4 +160,28 @@ impl Default for Config {
 pub struct VisibilityTemplate {
     pub visibility: Visibility,
     pub template: Template,
+}
+
+#[derive(Debug)]
+pub struct UpdateVisibilityTemplate {
+    pub visibility: Visibility,
+    pub template: Option<Template>,
+}
+
+impl VisibilityTemplate {
+    pub fn get_formatted_parts(&self, field: impl Display) -> (&Visibility, Ident) {
+        (
+            &self.visibility,
+            format_ident!("{}", self.template.format(field)),
+        )
+    }
+}
+
+impl UpdateVisibilityTemplate {
+    pub fn update(self, target: &mut VisibilityTemplate) {
+        target.visibility = self.visibility;
+        if let Some(t) = self.template {
+            target.template = t;
+        }
+    }
 }

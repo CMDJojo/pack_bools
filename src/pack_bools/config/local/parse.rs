@@ -4,11 +4,12 @@ use syn::Token;
 
 use crate::pack_bools::config::local::{Config, VisibilityIdent};
 use crate::pack_bools::config::local::modify::Modifier;
+use crate::pack_bools::config::Visibility;
 
 impl Parse for VisibilityIdent {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let visibility = input.parse()?;
-        let ident = input.parse()?;
+        let visibility: Visibility = input.parse()?;
+        let ident = input.parse().ok();
         Ok(VisibilityIdent { visibility, ident })
     }
 }

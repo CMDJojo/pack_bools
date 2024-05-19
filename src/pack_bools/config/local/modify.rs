@@ -20,9 +20,9 @@ impl Modifier {
         match self {
             Modifier::Skip => target.skip = true,
             Modifier::Getter(g) => target.getter = Accessor::Custom(g),
-            Modifier::NoGetter => target.getter = Accessor::None,
+            Modifier::NoGetter => target.getter = Accessor::Skip,
             Modifier::Setter(s) => target.setter = Accessor::Custom(s),
-            Modifier::NoSetter => target.setter = Accessor::None,
+            Modifier::NoSetter => target.setter = Accessor::Skip,
             Modifier::SetDefault(v) => target.default = v,
         }
     }

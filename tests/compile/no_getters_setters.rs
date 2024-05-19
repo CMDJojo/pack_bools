@@ -1,6 +1,6 @@
 use pack_bools::pack_bools;
 
-#[pack_bools(no_get)]
+#[pack_bools(no_get, no_set)]
 struct MyBools {
     a: bool,
     b: bool,

@@ -8,7 +8,7 @@ struct WithDefaults {
     #[pack_bools(default = false)]
     default_false_2: bool,
     #[pack_bools(default = true)]
-    default_true: bool
+    default_true: bool,
 }
 
 #[test]
@@ -25,7 +25,7 @@ struct CustomNames {
     bool_a: bool,
     bool_b: bool,
     #[pack_bools(get = pub get_custom)]
-    custom: bool
+    custom: bool,
 }
 
 #[test]
@@ -50,11 +50,32 @@ fn test_custom_names() {
 struct NoGetters {
     a: bool,
     #[pack_bools(get = get_me)]
-    b: bool
+    b: bool,
 }
 
 #[test]
 fn test_no_getters() {
     let x = NoGetters::default();
     assert!(!x.get_me());
+}
+
+mod inner {
+    use pack_bools::pack_bools;
+
+    #[pack_bools]
+    #[derive(Default)]
+    pub struct Inner {
+        pub(super) a: bool,
+        pub(crate) b: bool,
+        #[pack_bools(get = pub)]
+        c: bool
+    }
+}
+
+#[test]
+fn test_inner() {
+    let x = inner::Inner::default();
+    assert!(!x.get_a());
+    assert!(!x.get_b());
+    assert!(!x.get_c());
 }

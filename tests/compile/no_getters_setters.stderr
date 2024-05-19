@@ -1,0 +1,17 @@
+error[E0599]: no method named `get_a` found for struct `MyBools` in the current scope
+  --> tests/compile/no_getters_setters.rs:13:15
+   |
+3  | #[pack_bools(no_get, no_set)]
+   | ----------------------------- method `get_a` not found for this struct
+...
+13 |     let y = x.get_a();
+   |               ^^^^^ method not found in `MyBools`
+
+error[E0599]: no method named `set_b` found for struct `MyBools` in the current scope
+  --> tests/compile/no_getters_setters.rs:14:7
+   |
+3  | #[pack_bools(no_get, no_set)]
+   | ----------------------------- method `set_b` not found for this struct
+...
+14 |     x.set_b(true);
+   |       ^^^^^ method not found in `MyBools`

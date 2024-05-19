@@ -1,17 +1,15 @@
 error[E0599]: no method named `get_a` found for struct `MyBools` in the current scope
   --> tests/compile/no_getters.rs:13:15
    |
-3  | #[pack_bools(no_get, no_set)]
-   | ----------------------------- method `get_a` not found for this struct
+3  | #[pack_bools(no_get)]
+   | --------------------- method `get_a` not found for this struct
 ...
 13 |     let y = x.get_a();
-   |               ^^^^^ method not found in `MyBools`
-
-error[E0599]: no method named `set_b` found for struct `MyBools` in the current scope
-  --> tests/compile/no_getters.rs:14:7
+   |               ^^^^^
    |
-3  | #[pack_bools(no_get, no_set)]
-   | ----------------------------- method `set_b` not found for this struct
-...
-14 |     x.set_b(true);
-   |       ^^^^^ method not found in `MyBools`
+help: there is a method `set_a` with a similar name, but with different arguments
+  --> tests/compile/no_getters.rs:3:1
+   |
+3  | #[pack_bools(no_get)]
+   | ^^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `pack_bools` (in Nightly builds, run with -Z macro-backtrace for more info)

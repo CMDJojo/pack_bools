@@ -1,5 +1,8 @@
 //! # `pack_bools`: an easy way to pack all bools in your struct
 //!
+//! [![Crates.io](https://img.shields.io/crates/v/pack_bools.svg)](https://crates.io/crates/pack_bools)
+//! [![Docs.rs](https://docs.rs/pack_bools/badge.svg)](https://docs.rs/pack_bools)
+//! [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 //!
 //! `pack_bools` transforms structs with boolean fields into a struct containing an integer with bit flags for each boolean
 //! value:
@@ -34,25 +37,23 @@
 //!     }
 //!
 //!     fn set_verbose(&mut self, value: bool) {
-//!         let val = self.packed_bools;
-//!         self.packed_bools = if value {
-//!             val | 1 << 0
+//!         if value {
+//!             self.packed_bools |= 1 << 0;
 //!         } else {
-//!             val & !(1 << 1)
-//!         };
+//!             self.packed_bools &= !(1 << 0);
+//!         }
 //!     }
 //!
 //!     pub fn get_use_colors(&self) -> bool {
-//!         self.packed_bools & 1 << 0 != 0
+//!         self.packed_bools & 1 << 1 != 0
 //!     }
 //!
 //!     pub fn set_use_colors(&mut self, value: bool) {
-//!         let val = self.packed_bools;
-//!         self.packed_bools = if value {
-//!             val | 1 << 0
+//!         if value {
+//!             self.packed_bools |= 1 << 1;
 //!         } else {
-//!             val & !(1 << 1)
-//!         };
+//!             self.packed_bools &= !(1 << 1);
+//!         }
 //!     }
 //!
 //!     /* getters and setters for legacy_mode omitted */
@@ -67,17 +68,31 @@
 //! getter and setter will inherit their visibility from the field, so if the field is declared `pub(super)`, the getters
 //! and setters will too.
 //!
-//! There are lots of customization available, by adding options to the `#[pack_bools(...)]` attribute. Additionally, every
-//! boolean field can have a `#[pack_bools(...)]` attribute with additional options.
+//! By adding options to the `#[pack_bools(..)]` attribute, you can configure options for the entire struct, using
+//! *global options*. Additionally, you can add `#[pack_bools(..)]` to `boolean` fields to configure options for just that
+//! field, using *local options*.
 //!
-//! Global options available when using `#[pack_bools(...)]` on a struct:
+//! ### Global options
 //!
-//! * `#[pack_bools(getters = [vis] <name>)]` changes the name (and possibly visibility) of the getters. Use
-//!   `%` as a substitution for the field name. Using `#[pack_bools(getters = pub get_field_%)]` will make all getters
-//!   public named `get_field_<field-name>`. The visibility modifier is optional. Aliased as `get`/`getter`. For setters,
-//!   use `#[pack_bools(set/setter/setters = ...)]` instead.
-//! * `#[pack_bools(no_getters)]` will not generate getters (aliased as `no_get`/`no_getter`), similarly
-//!   `#[pack_bools(no_set/no_setter/no_setters)]` will not generate setters.
+//! Global options available when using `#[pack_bools(..)]` on a struct:
+//!
+//! * `#[pack_bools(getters = [vis] [name])]` changes the name and visibility of the getters.
+//!     * Use `%` as a substitution for the field name.
+//!     * If the name is skipped, the default name template will be used.
+//!     * `vis` is a Rust visibility modifier (such as `pub`, `pub(super)` etc.). Use `self` to reference the visibility of
+//!       the field (leaving `vis` empty otherwise implies private visibility, as in Rust).
+//!     * Example: Using `#[pack_bools(getters = pub get_field_%)]` will make all getters public named
+//!       `get_field_` followed by the field name. A field named `foo` will thus get a getter with the signature
+//!       `pub fn get_field_foo(&self) -> bool`.
+//!     * Example: Using `#[pack_bools(getters = self %)]` will make all getters have the same name as the field, with the
+//!       same visibility as the field.
+//!     * As a consequence of an empty template leaving the field name unchanged together with Rust using no modifier for
+//!       private items, just `#[pack_bools(getters = )]` will make all getters private named `get_` followed by the field
+//!       name (the default template). For clarity purposes, consider using `#[pack_bools(getters = get_%)]`
+//!     * Aliased as `get`/`getter`. For setters, use `#[pack_bools(set/setter/setters)]`.
+//!     * Default values are `#[pack_bools(get = self get_%, set = self set_%)]`.
+//! * `#[pack_bools(no_getters)]` will not generate getters (aliased as `no_get`/`no_getter`)
+//! * Similarly `#[pack_bools(no_set/no_setter/no_setters)]` will not generate setters.
 //! * `#[pack_bools(type = u16)]` will use `u16` as the data type for the bit flags. Available options are `u8`/`u16`/`u32`/
 //!   `u64`/`u128`/`auto`, where `auto` (the default option) automatically use the smallest of those types that can fit all
 //!   the bools in the struct.
@@ -107,26 +122,29 @@
 //!     }
 //!
 //!     fn set_verbose(&mut self, value: bool) {
-//!         let val = self.packed_bools.0;
-//!         self.packed_bools.0 = if value {
-//!             val | 1 << 0
+//!         if value {
+//!             self.packed_bools.0 |= 1 << 0;
 //!         } else {
-//!             val & !(1 << 1)
-//!         };
+//!             self.packed_bools.0 &= !(1 << 0);
+//!         }
 //!     }
 //!
 //!     /* additional getters and setters omitted */
 //! }
 //! ```
 //!
-//! You may add the `#[pack_bools(...)]` attribute on fields of type `bool` to configure the output of that specific field.
+//! ### Local options
+//!
+//! You may add the `#[pack_bools(..)]` attribute on fields of type `bool` to configure the output of that specific field.
 //! Available options are:
 //!
 //! * `#[pack_bools(skip)]` excludes that field from being packed with the other bools.
-//! * `#[pack_bools(getter = [vis] <name>)` changes the name (and possibly visibility) of the getter to that field.
-//!   `#[pack_bools(getter = pub debug_mode)]` added to a field `debug: bool` will create a getter like
-//!   `pub fn debug_mode(&self) -> bool { ... }`. Aliased as `get`. For setters, use
-//!   `#[pack_bools(set/setter = [vis] <name>)]`.
+//! * `#[pack_bools(getter = [vis] [name])` changes the name (and possibly visibility) of the getter to that field.
+//!     * This uses a concrete name instead of a template, otherwise it has the same syntax as the global
+//!       `#[pack_bools(getter = ..)]` attribute, see above.
+//!     * `#[pack_bools(getter = pub debug_mode)]` added to a field `debug: bool` will create a getter like
+//!       `pub fn debug_mode(&self) -> bool { .. }`. Aliased as `get`.
+//!     * For setters, use `#[pack_bools(set/setter = [vis] [name])]`.
 //! * `#[pack_bools(no_getter)]` skips generating a getter for that field. Aliased as `no_get`. For setters, use
 //!   `#[pack_bools(no_set/no_setter)]`.
 //! * `#[pack_bools(default = <true/false>)]` sets the default value for the field. If set to `true`, the `newtype` pattern
@@ -135,7 +153,7 @@
 //!   while having some boolean values set to `true`. Defaults to `false`.
 use proc_macro::TokenStream;
 
-use syn::{parse_macro_input, ItemStruct};
+use syn::{ItemStruct, parse_macro_input};
 
 use self::pack_bools::config::GlobalConfig;
 

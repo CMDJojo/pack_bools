@@ -4,12 +4,12 @@ use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
 
 use crate::pack_bools::config::global::{
-    FieldName, GenType, Config, PackingStrategy, VisibilityTemplate,
+    Config, FieldName, GenType, PackingStrategy, UpdateVisibilityTemplate,
 };
 
 pub enum Modifier {
-    Getters(VisibilityTemplate),
-    Setters(VisibilityTemplate),
+    Getters(UpdateVisibilityTemplate),
+    Setters(UpdateVisibilityTemplate),
     NoGetters,
     NoSetters,
     Type(PackingStrategy),
@@ -20,10 +20,10 @@ pub enum Modifier {
 impl Modifier {
     pub fn modify(self, target: &mut Config) {
         match self {
-            Modifier::Getters(g) => target.getter = Some(g),
-            Modifier::NoGetters => target.getter = None,
-            Modifier::Setters(s) => target.setter = Some(s),
-            Modifier::NoSetters => target.setter = None,
+            Modifier::Getters(g) => g.update(&mut target.getter),
+            Modifier::NoGetters => target.skip_getter = true,
+            Modifier::Setters(s) => s.update(&mut target.setter),
+            Modifier::NoSetters => target.skip_setter = true,
             Modifier::Type(t) => target.packed_type = t,
             Modifier::GenType(gt) => target.gen_type = gt,
             Modifier::Field(f) => target.field_name = f,
